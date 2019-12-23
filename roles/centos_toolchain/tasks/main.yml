@@ -1,0 +1,66 @@
+---
+- name: Disable selinux
+  selinux:
+    state: disabled
+
+- name: Centos toolchain
+  block:
+    - name: Remove any previous docker installs
+      yum:
+        name:
+          "{{ old_docker_install }}"
+        state: absent
+
+    - name: Add epel repo
+      yum_repository:
+        name: epel
+        description: EPEL YUM repo
+        baseurl: https://download.fedoraproject.org/pub/epel/$releasever/$basearch/
+        gpgcheck: False
+
+    - name: yum packages for baseline tools
+      yum:
+        name:
+          "{{ centos_toolchain }}"
+        state: latest
+
+    - name: pip requirements
+      pip:
+        name:
+          - docker
+        executable: pip3
+  tags: centos_toolchain
+  
+# Install packages for non-aws vms
+- name: Install packages for non-aws vms
+  block:
+    - name: Download AWS and Terraform
+      uri:
+        url: "{{ item }}"
+        dest: "{{ download_path }}"
+      with_items:
+        - https://d1vvhvl2y92vvt.cloudfront.net/awscli-exe-linux-x86_64.zip
+        - https://releases.hashicorp.com/terraform/0.12.18/terraform_0.12.18_linux_amd64.zip
+
+    - name: Extract and Install applications
+      shell: |
+        unzip {{ download_path }}/awscliv2.zip
+        "{{ download_path }}/aws/install"
+        unzip {{ download_path }}terraform_0.12.18_linux_amd64.zip
+        mv {{ download_path }}/terraform /usr/local/bin/terraform
+  tags: [ never, install_aws_terraform ]
+
+- name: Add docker yum repository
+  yum_repository:
+    name: docker-repo
+    description: docker ce repository
+    baseurl: https://download.docker.com/linux/centos/7/$basearch/stable
+    gpgcheck: True
+    gpgkey: https://download.docker.com/linux/centos/gpg
+
+- name: Update secure path in sudoers file
+  lineinfile:
+    path: /etc/sudoers
+    regexp: '^Defaults    secure_path = /sbin:/bin:/usr/sbin:/usr/bin'
+    line: Defaults    secure_path = /sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin
+  tags: secure_path
