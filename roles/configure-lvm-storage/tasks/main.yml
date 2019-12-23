@@ -1,0 +1,60 @@
+---
+- name: Confiugure LVM
+  block:
+    - name: Set device name without double quotes
+      set_fact: 
+        block_device: "{{ device_name }}"
+
+    - name: Scanning for new disks
+      command: /usr/bin/rescan-scsi-bus.sh
+      when: ansible_os_family == "RedHat"
+      tags: [never, rescan_disk]
+
+    - name: Create a primary partition for LVM
+      parted:
+        device: /dev/{{ block_device }}
+        number: 1
+        part_type: primary
+        flags: [ lvm ]
+        state: present
+      when: partition == True
+
+    - name: Create volume group
+      lvg:
+        vg: "{{ volume_group }}" 
+        pvs: /dev/{{ block_device }}
+        state: present
+
+    - name: Create logical volumes
+      lvol:
+        vg: "{{ volume_group }}" 
+        lv: "{{ logical_volume }}"
+        size: "{{ volume_size }}"
+    
+    - name: Create filesystem for logical volume
+      filesystem: 
+        fstype: xfs 
+        dev: /dev/{{ volume_group }}/{{ logical_volume }} 
+
+    # this isn't getting evaluated properly
+    - name: Update /etc/fstab
+      lineinfile:
+        line: /dev/{{ volume_group }}/{{ logical_volume }} {{ mount_point }}      xfs     defaults        1 2
+        path: /etc/fstab
+        create: True
+      tags: persist_boot
+
+    - name: Mount new volume
+      mount: 
+        name: "{{ mount_point }}"
+        src: /dev/{{ volume_group }}/{{ logical_volume }} 
+        fstype: xfs
+        state: mounted
+      tags: mount_volume
+  tags: lvm_create
+
+- name: Displace data
+  block:
+    - name: Synchronize all data to new location
+      synchronize:
+        

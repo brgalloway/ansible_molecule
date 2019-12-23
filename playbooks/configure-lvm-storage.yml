@@ -1,0 +1,14 @@
+---
+- name: Configure LVM on raw device
+  hosts: awx_servers
+  remote_user: "{{ remote_user | default('root') }}"
+  gather_facts: True
+  become: True
+  roles:
+    - role: configure-lvm-storage
+      partition: False
+      device_name: nvme1n1
+      volume_group: awx-storage
+      logical_volume: docker-volume
+      volume_size: 40g
+      mount_point: /opt/docker-volume
