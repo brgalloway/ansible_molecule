@@ -22,7 +22,6 @@
       yum:
         name:
           "{{ centos_toolchain }}"
-        state: latest
 
     - name: pip requirements
       pip:
@@ -30,7 +29,7 @@
           - docker
         executable: pip3
   tags: centos_toolchain
-  
+
 # Install packages for non-aws vms
 - name: Install packages for non-aws vms
   block:
@@ -42,11 +41,16 @@
         - https://d1vvhvl2y92vvt.cloudfront.net/awscli-exe-linux-x86_64.zip
         - https://releases.hashicorp.com/terraform/0.12.18/terraform_0.12.18_linux_amd64.zip
 
-    - name: Extract and Install applications
+    - name: Extract applications
+      unarchive:
+        src: {{ download_path}}/{{ item }}
+        dest: "{{ download_path }}"
+      with_items:
+        - awscliv2.zip
+        - terraform_0.12.18_linux_amd64.zip
+    - name: Install applications
       shell: |
-        unzip {{ download_path }}/awscliv2.zip
         "{{ download_path }}/aws/install"
-        unzip {{ download_path }}terraform_0.12.18_linux_amd64.zip
         mv {{ download_path }}/terraform /usr/local/bin/terraform
   tags: [ never, install_aws_terraform ]
 
