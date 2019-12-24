@@ -1,6 +1,6 @@
 language: python
 python:
-  - "2.7"
+  #- "2.7"
   - "3.6"
   
 env:
@@ -16,3 +16,4 @@ install:
 script:
   - cd ./${ROLE_DIR}/centos_toolchain
   - molecule lint
+  - molecule syntax
