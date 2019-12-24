@@ -43,11 +43,12 @@
 
     - name: Extract applications
       unarchive:
-        src: {{ download_path}}/{{ item }}
+        src: "{{ download_path}}/{{ item }}"
         dest: "{{ download_path }}"
       with_items:
         - awscliv2.zip
         - terraform_0.12.18_linux_amd64.zip
+
     - name: Install applications
       shell: |
         "{{ download_path }}/aws/install"
