@@ -14,7 +14,5 @@ install:
   - pip install molecule docker
 
 script:
-  - ls -lah
-  - molecule --version
   - cd ./${ROLE_DIR}/centos_toolchain
-  - molecule test
+  - molecule lint
