@@ -1,12 +1,20 @@
 language: python
-
+python:
+  - "2.7"
+  - "3.6"
+  
+env:
+  global:
+    - ROLE_DIR=./roles
+    
 services:
   - docker
 
-before_install:
-  - docker pull quay.io/ansible/molecule
-  - docker run --rm -it -v "$(pwd)":/tmp/$(basename "${PWD}"):ro -v /var/run/docker.sock:/var/run/docker.sock -w /tmp/$(basename "${PWD}") quay.io/ansible/molecule:2.22 sh
+install:
+  - pip install molecule docker
+
 script:
   - ls -lah
   - molecule --version
-  - docker ps -a
+  - cd ./${ROLE_DIR}/centos_toolchain
+  - molecule test
