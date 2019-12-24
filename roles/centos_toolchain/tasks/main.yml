@@ -43,7 +43,7 @@
 
     - name: Extract applications
       unarchive:
-        src: "{{ download_path}}/{{ item }}"
+        src: "{{ download_path }}/{{ item }}"
         dest: "{{ download_path }}"
       with_items:
         - awscliv2.zip
