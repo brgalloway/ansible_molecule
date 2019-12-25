@@ -6,7 +6,7 @@ python:
 env:
   global:
     - ROLE_DIR=$(pwd)/roles
-    - ROLE_NAME="centos_toolchain"
+    - ROLE_NAME="configure-lvm-storage"
     
 services:
   - docker
@@ -15,7 +15,6 @@ install:
   - pip install molecule docker
 
 script:
-  - ln -s ./.yamllint ${ROLE_DIR}/.yamllint
   - cd ${ROLE_DIR}/${ROLE_NAME}
   - molecule lint
   - molecule syntax
