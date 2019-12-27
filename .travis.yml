@@ -6,6 +6,7 @@ python:
 env:
   global:
     - ROLE_DIR=./roles
+    - ROLE_NAME=centos_toolchain
     
 services:
   - docker
@@ -14,6 +15,5 @@ install:
   - pip install molecule docker
 
 script:
-  - cd ./${ROLE_DIR}/centos_toolchain
-  - molecule lint
-  - molecule syntax
+  - cd ./${ROLE_DIR}/${ROLE_NAME}
+  - molecule --debug test
